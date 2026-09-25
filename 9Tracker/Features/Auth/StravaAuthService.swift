@@ -13,7 +13,11 @@ final class StravaAuthService: NSObject {
     // Info.plist — never hardcoded, never committed. See Config/Secrets.xcconfig.example.
     private let clientID: String = Bundle.main.infoDictionary?["StravaClientID"] as? String ?? ""
     private let clientSecret: String = Bundle.main.infoDictionary?["StravaClientSecret"] as? String ?? ""
-    private let redirectURI = "ninetracker://oauth-callback"
+    // Strava validates redirect_uri by its HOST matching the app's registered
+    // "Authorization Callback Domain" (localhost) — a bare custom scheme like
+    // "ninetracker://oauth-callback" has no host and gets rejected with
+    // "redirect_uri invalid". Host must literally be "localhost".
+    private let redirectURI = "ninetracker://localhost/oauth-callback"
 
     private var webAuthSession: ASWebAuthenticationSession?
 

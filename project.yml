@@ -27,6 +27,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: id.sragen.ninetracker
         PRODUCT_MODULE_NAME: NineTracker
         SWIFT_STRICT_CONCURRENCY: complete
+        DEVELOPMENT_TEAM: 78WCZ448VT
+        CODE_SIGN_STYLE: Automatic
     capabilities:
       - com.apple.security.application-groups
   9TrackerTests:
