@@ -26,6 +26,7 @@
 		846C9406FF5A81E82A6930E5 /* BodyMetricsPhotoReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F25CAD9CEB9F4300DD5246F /* BodyMetricsPhotoReviewView.swift */; };
 		8CED064666E6F3D329CE8235 /* StravaAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B068E39B28AFB1EA94851B /* StravaAuthService.swift */; };
 		8E8E3DC464D1E2E1BAA36CD7 /* GymPhotoReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316BF46C92F2B13A363EB0A9 /* GymPhotoReviewView.swift */; };
+		935920C876AC45BBD5F4198A /* LogHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8956DEBF408A7E91650FA072 /* LogHubView.swift */; };
 		95D92C220C8E5A9B7D7D6A3E /* HRZoneCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EEF72EEB63628BEF335D844 /* HRZoneCalculator.swift */; };
 		9C4D1C33DADE8CA9E2A7561C /* BodyMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3491C2186B55A5D41333FE /* BodyMetrics.swift */; };
 		A95A22C553FBCBAC83944AB8 /* GymLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B156262E25E1F4EF717C25 /* GymLogView.swift */; };
@@ -73,6 +74,7 @@
 		80B068E39B28AFB1EA94851B /* StravaAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StravaAuthService.swift; sourceTree = "<group>"; };
 		8265FB917F4CD03D3D0DE1A3 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		83B156262E25E1F4EF717C25 /* GymLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymLogView.swift; sourceTree = "<group>"; };
+		8956DEBF408A7E91650FA072 /* LogHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogHubView.swift; sourceTree = "<group>"; };
 		924801786D499304B1F135A2 /* BodyMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyMetricsView.swift; sourceTree = "<group>"; };
 		94AD1D24AB87E5B11B7083F6 /* RecoveryPhotoReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPhotoReviewView.swift; sourceTree = "<group>"; };
 		A203D1DC481C9192D5B45150 /* NineTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NineTrackerApp.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 				CE3A9828DB3C441C4638BB5F /* BodyMetrics */,
 				7058B7FE43DB9244597A54A7 /* Dashboard */,
 				805C222879989388FE981C3C /* Gym */,
+				ED3AE175E0FE201677AFA902 /* LogHub */,
 				238FB90E777D30A8A6C56158 /* OCR */,
 				4F2BB6655D05630CEFFFC3E3 /* Recovery */,
 				416084AA504967FAECF93A0C /* Strava */,
@@ -259,6 +262,14 @@
 				C1E16C7543E3C3A05DC7649F /* Settings */,
 			);
 			path = 9Tracker;
+			sourceTree = "<group>";
+		};
+		ED3AE175E0FE201677AFA902 /* LogHub */ = {
+			isa = PBXGroup;
+			children = (
+				8956DEBF408A7E91650FA072 /* LogHubView.swift */,
+			);
+			path = LogHub;
 			sourceTree = "<group>";
 		};
 		F539526DA05483A050AEF43E /* ActivityDetail */ = {
@@ -371,6 +382,7 @@
 				02A58A2987B2140EE8E45ED4 /* GymTemplateStore.swift in Sources */,
 				95D92C220C8E5A9B7D7D6A3E /* HRZoneCalculator.swift in Sources */,
 				3516510F76565FFF75B94165 /* KeychainStore.swift in Sources */,
+				935920C876AC45BBD5F4198A /* LogHubView.swift in Sources */,
 				BAF838FB8B7040F2AC95F04B /* LoginView.swift in Sources */,
 				5E02726576696D45D1181B45 /* NineTrackerApp.swift in Sources */,
 				F94DBBFD2BDAEF730307C5E6 /* ProfileStore.swift in Sources */,

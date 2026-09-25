@@ -46,7 +46,7 @@ private struct RootView: View {
                 DashboardView()
                     .tabItem { Label("Summary", systemImage: "chart.bar") }
 
-                NavigationStack { GymLogView() }
+                NavigationStack { LogHubView() }
                     .tabItem { Label("Log", systemImage: "plus.circle") }
 
                 NavigationStack { AICoachView() }

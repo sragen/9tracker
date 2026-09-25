@@ -1,9 +1,11 @@
+import Charts
 import SwiftUI
 
 struct ActivityDetailView: View {
     let activity: Activity
 
     @Environment(StravaAuthService.self) private var auth
+    @Environment(ProfileStore.self) private var profile
     @State private var streams: [StravaStreamDTO] = []
     @State private var isLoadingStreams = false
     @State private var streamsError: String?
@@ -24,15 +26,66 @@ struct ActivityDetailView: View {
                 ProgressView("Loading elevation & HR zones…")
             } else if let streamsError {
                 Text(streamsError).foregroundStyle(.red)
+            } else if !streams.isEmpty {
+                if let elevationPoints = elevationSeries() {
+                    Section("Elevation") {
+                        Chart(elevationPoints, id: \.distanceKm) { point in
+                            AreaMark(x: .value("km", point.distanceKm), y: .value("m", point.altitude))
+                        }
+                        .frame(height: 120)
+                    }
+                }
+
+                if let zoneResult = hrZoneResult() {
+                    Section("Heart rate zones") {
+                        ForEach(zoneResult.zones, id: \.name) { zone in
+                            HStack {
+                                Text(zone.name)
+                                Spacer()
+                                Text(formattedDuration(zone.secondsInZone))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        if zoneResult.minutesAboveThreshold > 0 {
+                            Text(String(format: "%.0f min above your power-hike trigger", zoneResult.minutesAboveThreshold))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
-            // TODO: HR zone breakdown + elevation chart render here once
-            // streams are loaded — computed via HRZoneCalculator.compute(...),
-            // never persisted (see PRD §9).
         }
         .navigationTitle(activity.type)
         .task {
             await loadStreams()
         }
+    }
+
+    // MARK: - Stream helpers
+
+    private struct ElevationPoint {
+        let distanceKm: Double
+        let altitude: Double
+    }
+
+    private func elevationSeries() -> [ElevationPoint]? {
+        guard let altitude = streams.first(where: { $0.type == "altitude" })?.data,
+              let distance = streams.first(where: { $0.type == "distance" })?.data,
+              altitude.count == distance.count else { return nil }
+        return zip(distance, altitude).map { ElevationPoint(distanceKm: $0 / 1000, altitude: $1) }
+    }
+
+    private func hrZoneResult() -> HRZoneCalculator.Result? {
+        guard let heartRates = streams.first(where: { $0.type == "heartrate" })?.data,
+              let times = streams.first(where: { $0.type == "time" })?.data,
+              heartRates.count == times.count, !heartRates.isEmpty else { return nil }
+        return HRZoneCalculator.compute(
+            heartRates: heartRates,
+            times: times,
+            hrMax: profile.hrMax,
+            hrRest: profile.hrRest,
+            threshold: 150
+        )
     }
 
     private func loadStreams() async {
