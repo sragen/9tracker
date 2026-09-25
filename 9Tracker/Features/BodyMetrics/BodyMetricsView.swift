@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftData
 import SwiftUI
 
@@ -14,6 +15,18 @@ struct BodyMetricsView: View {
     @State private var visceralFat: Int = 7
     @State private var bmrKcal: Double = 1600
 
+    @State private var photoItem: PhotosPickerItem?
+    @State private var isProcessingPhoto = false
+    @State private var ocrReview: OCRReview?
+    @State private var photoError: String?
+
+    private struct OCRReview: Identifiable, Hashable {
+        let id = UUID()
+        let extracted: OCRExtractedBodyMetrics
+        static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+        func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    }
+
     var body: some View {
         Form {
             Stepper("Weight: \(weightKg, specifier: "%.1f") kg", value: $weightKg, in: 30...200, step: 0.1)
@@ -22,10 +35,26 @@ struct BodyMetricsView: View {
             Stepper("Visceral fat: \(visceralFat)", value: $visceralFat, in: 1...30)
             Stepper("BMR: \(bmrKcal, specifier: "%.0f") kcal", value: $bmrKcal, in: 800...4000, step: 5)
 
+            Section("From photo") {
+                PhotosPicker("Import from InBody scan photo", selection: $photoItem, matching: .images)
+                if isProcessingPhoto {
+                    ProgressView("Reading scan…")
+                }
+                if let photoError {
+                    Text(photoError).foregroundStyle(.red).font(.caption)
+                }
+            }
+
             Button("Save", action: save)
         }
         .navigationTitle("InBody scan")
         .onAppear(perform: prefillFromLastScan)
+        .onChange(of: photoItem) { _, newItem in
+            Task { await processPhoto(newItem) }
+        }
+        .navigationDestination(item: $ocrReview) { review in
+            BodyMetricsPhotoReviewView(extracted: review.extracted, onConfirm: saveFromPhoto)
+        }
     }
 
     private func prefillFromLastScan() {
@@ -48,6 +77,44 @@ struct BodyMetricsView: View {
         )
         modelContext.insert(scan)
         try? modelContext.save()
+    }
+
+    // MARK: - Photo import
+
+    private func processPhoto(_ item: PhotosPickerItem?) async {
+        guard let item else { return }
+        isProcessingPhoto = true
+        photoError = nil
+        defer { isProcessingPhoto = false }
+
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else {
+                photoError = "Couldn't load that photo."
+                return
+            }
+            let lines = try await VisionOCRService.recognizeText(in: image)
+            guard let extracted = BodyMetricsOCRParser.parse(lines) else {
+                photoError = "Couldn't find a weight reading in that photo."
+                return
+            }
+            ocrReview = OCRReview(extracted: extracted)
+        } catch {
+            photoError = error.localizedDescription
+        }
+    }
+
+    private func saveFromPhoto(_ extracted: OCRExtractedBodyMetrics) {
+        let scan = BodyMetrics(
+            date: .now,
+            weightKg: extracted.weightKg,
+            bodyFatPercent: extracted.bodyFatPercent,
+            skeletalMuscleMassKg: extracted.muscleMassKg
+        )
+        modelContext.insert(scan)
+        try? modelContext.save()
+        ocrReview = nil
+        photoItem = nil
     }
 }
 

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftData
 import SwiftUI
 
@@ -15,6 +16,18 @@ struct RecoveryLogView: View {
     @State private var deepSleepMinutes = 12
     @State private var overnightHR: Double = 55
     @State private var hrv: Double = 45
+
+    @State private var photoItem: PhotosPickerItem?
+    @State private var isProcessingPhoto = false
+    @State private var ocrReview: OCRReview?
+    @State private var photoError: String?
+
+    private struct OCRReview: Identifiable, Hashable {
+        let id = UUID()
+        let extracted: OCRExtractedRecovery
+        static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+        func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    }
 
     var body: some View {
         Form {
@@ -52,10 +65,26 @@ struct RecoveryLogView: View {
                 Stepper("HRV: \(Int(hrv)) ms", value: $hrv, in: 10...150)
             }
 
+            Section("From screenshot") {
+                PhotosPicker("Import from Huawei Health screenshot", selection: $photoItem, matching: .images)
+                if isProcessingPhoto {
+                    ProgressView("Reading screenshot…")
+                }
+                if let photoError {
+                    Text(photoError).foregroundStyle(.red).font(.caption)
+                }
+            }
+
             Button("Save", action: save)
         }
         .navigationTitle("New log")
         .onAppear(perform: prefillFromLastNight)
+        .onChange(of: photoItem) { _, newItem in
+            Task { await processPhoto(newItem) }
+        }
+        .navigationDestination(item: $ocrReview) { review in
+            RecoveryPhotoReviewView(extracted: review.extracted, onConfirm: saveFromPhoto)
+        }
     }
 
     private func prefillFromLastNight() {
@@ -76,6 +105,45 @@ struct RecoveryLogView: View {
         )
         modelContext.insert(log)
         try? modelContext.save()
+    }
+
+    // MARK: - Photo import
+
+    private func processPhoto(_ item: PhotosPickerItem?) async {
+        guard let item else { return }
+        isProcessingPhoto = true
+        photoError = nil
+        defer { isProcessingPhoto = false }
+
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else {
+                photoError = "Couldn't load that photo."
+                return
+            }
+            let lines = try await VisionOCRService.recognizeText(in: image)
+            guard let extracted = RecoveryOCRParser.parse(lines) else {
+                photoError = "Couldn't find a sleep score in that screenshot."
+                return
+            }
+            ocrReview = OCRReview(extracted: extracted)
+        } catch {
+            photoError = error.localizedDescription
+        }
+    }
+
+    private func saveFromPhoto(_ extracted: OCRExtractedRecovery) {
+        let log = RecoveryLog(
+            date: .now,
+            sleepScore: extracted.sleepScore,
+            sleepDurationSeconds: Double(extracted.sleepMinutes * 60),
+            overnightHeartRate: Double(extracted.overnightHR),
+            hrv: Double(extracted.hrv)
+        )
+        modelContext.insert(log)
+        try? modelContext.save()
+        ocrReview = nil
+        photoItem = nil
     }
 }
 

@@ -4,6 +4,7 @@ import SwiftUI
 /// AI Coach chat. Always shows the "not a substitute for a coach or doctor"
 /// disclaimer (see PRD §4.7) — present but not alarmist.
 struct AICoachView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query private var activities: [Activity]
     @Query private var gymSessions: [GymSession]
     @Query private var recoveryLogs: [RecoveryLog]
@@ -12,6 +13,7 @@ struct AICoachView: View {
     @State private var messages: [DeepSeekClient.Message] = []
     @State private var draft = ""
     @State private var isSending = false
+    @State private var saveConfirmation: String?
 
     private let client = DeepSeekClient()
 
@@ -22,9 +24,20 @@ struct AICoachView: View {
                 .foregroundStyle(.secondary)
                 .padding(8)
 
-            List(messages.filter { $0.role != "system" }, id: \.content) { message in
-                Text(message.content)
-                    .frame(maxWidth: .infinity, alignment: message.role == "user" ? .trailing : .leading)
+            List {
+                ForEach(Array(messages.enumerated()).filter { $0.element.role != "system" }, id: \.offset) { index, message in
+                    VStack(alignment: message.role == "user" ? .trailing : .leading) {
+                        Text(message.content)
+                            .frame(maxWidth: .infinity, alignment: message.role == "user" ? .trailing : .leading)
+                        if message.role == "assistant", let goal = RaceGoalParser.parse(message.content) {
+                            Button("Save as race goal") { saveRaceGoal(goal) }
+                                .font(.caption)
+                        }
+                    }
+                }
+                if let saveConfirmation {
+                    Text(saveConfirmation).font(.caption).foregroundStyle(.green)
+                }
             }
 
             HStack {
@@ -63,11 +76,49 @@ struct AICoachView: View {
             }
         }
     }
+
+    private func saveRaceGoal(_ goal: RaceGoalParser.ParsedGoal) {
+        let raceGoal = RaceGoal(
+            raceDate: goal.raceDate ?? Date().addingTimeInterval(90 * 86400),
+            distanceMeters: goal.distanceMeters,
+            targetTimeSeconds: goal.targetTimeSeconds
+        )
+        modelContext.insert(raceGoal)
+        try? modelContext.save()
+        saveConfirmation = "Saved: \(String(format: "%.0fkm", goal.distanceMeters / 1000)) race goal."
+    }
+}
+
+/// Fase 1 heuristic: extracts "<distance>K/km" and "target H:MM" patterns from
+/// AI coach replies, so the user can save a pacing plan without retyping it.
+/// Does not attempt to parse a real date — user can edit the saved goal later.
+enum RaceGoalParser {
+    struct ParsedGoal {
+        let distanceMeters: Double
+        let targetTimeSeconds: Double
+        let raceDate: Date?
+    }
+
+    static func parse(_ text: String) -> ParsedGoal? {
+        let distancePattern = #/(\d+\.?\d*)\s*(?:km|K\b)/#
+        let timePattern = #/[Tt]arget\s*(\d+):(\d+)/#
+
+        guard let distanceMatch = try? distancePattern.firstMatch(in: text),
+              let distance = Double(distanceMatch.1) else { return nil }
+        guard let timeMatch = try? timePattern.firstMatch(in: text),
+              let hours = Double(timeMatch.1), let minutes = Double(timeMatch.2) else { return nil }
+
+        return ParsedGoal(
+            distanceMeters: distance * 1000,
+            targetTimeSeconds: hours * 3600 + minutes * 60,
+            raceDate: nil
+        )
+    }
 }
 
 #Preview {
     NavigationStack {
         AICoachView()
     }
-    .modelContainer(for: [Activity.self, GymSession.self, RecoveryLog.self, BodyMetrics.self], inMemory: true)
+    .modelContainer(for: [Activity.self, GymSession.self, RecoveryLog.self, BodyMetrics.self, RaceGoal.self], inMemory: true)
 }
