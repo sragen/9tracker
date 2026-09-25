@@ -83,6 +83,7 @@
 		C0F5B52DA411A5F7CE9B5F88 /* GymTemplateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymTemplateStore.swift; sourceTree = "<group>"; };
 		CB3F5AE23CEF8B7C0F1E5CA0 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		E2CD9FB398AC19F7D97762CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E3FFA8C980DC38A6703102BE /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		E5E58583AB517970935636B8 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F6EB1D6CF07C7525750915BD /* RecoveryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryLog.swift; sourceTree = "<group>"; };
 		FF24FA46F0412FB72F553F75 /* DeepSeekClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekClient.swift; sourceTree = "<group>"; };
@@ -124,6 +125,7 @@
 			children = (
 				DADBEC146621EA595A939BB3 /* 9Tracker */,
 				A101F2D0CD9F6F740B959A24 /* 9TrackerTests */,
+				58B69C475E1FADF18E2C0B05 /* Config */,
 				D0112367D665CA426E2FC4A9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -145,6 +147,14 @@
 				94AD1D24AB87E5B11B7083F6 /* RecoveryPhotoReviewView.swift */,
 			);
 			path = Recovery;
+			sourceTree = "<group>";
+		};
+		58B69C475E1FADF18E2C0B05 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				E3FFA8C980DC38A6703102BE /* Secrets.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		7058B7FE43DB9244597A54A7 /* Dashboard */ = {
@@ -437,6 +447,7 @@
 		};
 		3747ED091B655E8127F7FA86 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E3FFA8C980DC38A6703102BE /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -536,6 +547,7 @@
 		};
 		8FD70DD2877B847C2BFC01E4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E3FFA8C980DC38A6703102BE /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

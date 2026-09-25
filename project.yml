@@ -3,6 +3,9 @@ options:
   bundleIdPrefix: id.sragen
   deploymentTarget:
     iOS: "18.0"
+configFiles:
+  Debug: Config/Secrets.xcconfig
+  Release: Config/Secrets.xcconfig
 settings:
   SWIFT_VERSION: "6.0"
 targets:
@@ -15,6 +18,8 @@ targets:
       properties:
         CFBundleDisplayName: 9Tracker
         UILaunchScreen: {}
+        StravaClientID: $(STRAVA_CLIENT_ID)
+        StravaClientSecret: $(STRAVA_CLIENT_SECRET)
         CFBundleURLTypes:
           - CFBundleURLSchemes: [ninetracker]
     settings:

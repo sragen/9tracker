@@ -9,9 +9,10 @@ import Observation
 final class StravaAuthService: NSObject {
     private(set) var isAuthenticated = false
 
-    // TODO: move to a build config / xcconfig before first real run — never commit real values.
-    private let clientID = "REPLACE_ME"
-    private let clientSecret = "REPLACE_ME"
+    // Injected at build time from Config/Secrets.xcconfig (gitignored) via
+    // Info.plist — never hardcoded, never committed. See Config/Secrets.xcconfig.example.
+    private let clientID: String = Bundle.main.infoDictionary?["StravaClientID"] as? String ?? ""
+    private let clientSecret: String = Bundle.main.infoDictionary?["StravaClientSecret"] as? String ?? ""
     private let redirectURI = "ninetracker://oauth-callback"
 
     private var webAuthSession: ASWebAuthenticationSession?
