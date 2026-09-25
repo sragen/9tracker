@@ -7,6 +7,22 @@ enum APIError: Error {
     case decoding(Error)
 }
 
+extension APIError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .transport(let error):
+            return "Network error: \(error.localizedDescription)"
+        case .invalidResponse:
+            return "Invalid server response"
+        case .httpError(let status, let body):
+            let bodyText = String(data: body, encoding: .utf8) ?? ""
+            return "HTTP \(status): \(bodyText)"
+        case .decoding(let error):
+            return "Couldn't parse response: \(error.localizedDescription)"
+        }
+    }
+}
+
 /// Thin async/await HTTP helper. No retry/caching logic here by design —
 /// callers (StravaAPIClient, DeepSeekClient) know which requests are safe to retry.
 enum APIClient {

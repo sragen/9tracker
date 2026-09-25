@@ -8,6 +8,14 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let error = syncService.lastSyncError {
+                    Section {
+                        Text("Sync failed: \(error.localizedDescription)")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
                 Section("Running") {
                     if let weekly = weeklyDistanceKm {
                         LabeledContent("This week", value: String(format: "%.1f km", weekly))
