@@ -1,0 +1,45 @@
+name: 9Tracker
+options:
+  bundleIdPrefix: id.sragen
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  SWIFT_VERSION: "6.0"
+targets:
+  9Tracker:
+    type: application
+    platform: iOS
+    sources: [9Tracker]
+    info:
+      path: 9Tracker/Info.plist
+      properties:
+        CFBundleDisplayName: 9Tracker
+        UILaunchScreen: {}
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [ninetracker]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: id.sragen.ninetracker
+        PRODUCT_MODULE_NAME: NineTracker
+        SWIFT_STRICT_CONCURRENCY: complete
+    capabilities:
+      - com.apple.security.application-groups
+  9TrackerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [9TrackerTests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: 9Tracker
+schemes:
+  9Tracker:
+    build:
+      targets:
+        9Tracker: all
+        9TrackerTests: [test]
+    test:
+      targets: [9TrackerTests]
+    run:
+      config: Debug
