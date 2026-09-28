@@ -47,7 +47,12 @@ enum APIClient {
         }
 
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            let decoder = JSONDecoder()
+            // Strava (and most REST APIs) send dates as ISO8601 strings, not
+            // epoch numbers — Swift's default JSONDecoder expects numbers and
+            // fails with a generic "data isn't in the correct format" error.
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(T.self, from: data)
         } catch {
             throw APIError.decoding(error)
         }
